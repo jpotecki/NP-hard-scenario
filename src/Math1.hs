@@ -1,55 +1,19 @@
 {-# LANGUAGE RecordWildCards #-}
+
 module Math1 where
 
 import Geom2D
 import Data.Maybe
 import Data.List (minimumBy, (\\))
-
-type Start a  = Point a
-type Target a = Point a
-
-data Path a
-   = Path
-   { path :: [Line a]
-   , dist :: a
-   } 
-   | EmptyPath
-   deriving (Show, Eq)
-
-instance Ord a => Ord (Path a) where
-    compare EmptyPath EmptyPath = EQ
-    compare EmptyPath Path{..}   = LT
-    compare Path{..} EmptyPath   = GT
-    compare Path{dist = d1} Path{dist = d2} = d1 `compare` d2
-
-join :: (Floating a) => Path a -> Path a -> Path a
-join p1 EmptyPath = p1
-join EmptyPath p2 = p2
-join p1 p2 = Path (path p1 ++ path p2) (dist p1 + dist p2)
-
-normalizePath :: Eq a => Path a -> Path a
--- ^ If two consequtive points are the same, throw them out
-normalizePath Path{..} = Path path' dist
-  where
-    path' = filter (\(Line x y) -> if x == y then False else True) path
-
-getP1 :: Line a -> Point a
-getP1 (Line p _) = p
-
-getP2 :: Line a -> Point a 
-getP2 (Line _ p) = p
+import Types
 
 tuple2Point :: (Ord a, Floating a) => (a, a) -> Point a
 tuple2Point (x, y) = Point x y
 
 transformPolygon :: Polygon a -> [Line a]
 -- ^ transfors a poligon to a list of lines
-transformPolygon (Polygon xs) = permutationOfPairsWith (Line) xs
-
-permutationOfPairsWith :: (a -> a -> b) -> [a] -> [b]
-permutationOfPairsWith f xs = zipWith f xs xs'
-  where
-    xs' = (last xs) : init xs
+transformPolygon (Polygon xs) = zipWith (Line) xs xs'
+  where xs' = (last xs) : init xs
 
 getAllObstacleLines :: [Polygon a] -> [Line a]
 -- ^ Transforms polygons to a list of lines
@@ -107,4 +71,3 @@ getPath acc start target obst =
                      right= getPath accR pR target (obst \\ [nextLine])
                      left = getPath accL pL target (obst \\ [nextLine])
                   in join acc (min left right)
-            -- return $ join acc left

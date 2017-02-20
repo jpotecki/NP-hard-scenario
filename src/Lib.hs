@@ -6,8 +6,9 @@ import Math1
 import Geom2D
 import Data.List
 import Control.Parallel.Strategies
+import Types
 
-robots :: [Point Double]
+robots :: [DPoint]
 robots =  fmap tuple2Point rawRobot
 
 rawRobot :: [(Double, Double)]
@@ -25,10 +26,9 @@ rawPolygons' =  [ [(1,2),(1,4),(3,4),(3,2)]
                 ]
 
 someFunc :: IO ()
-someFunc = do
-    let robotPermutations = (,) <$> init robots <*> tail robots
-        polygons'         = getAllObstacleLines polygons
-        getPath' = \(r1,r2) -> getPath EmptyPath r1 r2 polygons'
-        mapping  = map getPath' robotPermutations -- lazy piece of shit
-        computed = mapping `using` parList rseq
-     in mapM_ (print . normalizePath) computed
+someFunc = let  robotPermutations = (,) <$> init robots <*> tail robots
+                polygons'         = getAllObstacleLines polygons
+                getPath' = \(r1,r2) -> getPath EmptyPath r1 r2 polygons'
+                mapping  = map getPath' robotPermutations -- lazy piece of shit
+                computed = mapping `using` parList rseq
+             in mapM_ (print . normalizePath) computed

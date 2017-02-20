@@ -1,49 +1,39 @@
-module Types where 
+{-# LANGUAGE RecordWildCards #-}
 
--- type Start = Point
--- type End   = Point
+module Types where
 
--- data Point = Point { x :: Double
---                    , y :: Double 
---                    } deriving (Show, Eq)
+import Geom2D
 
--- data Vector = VecL { p1 :: Point
---                    , p2 :: Point } deriving (Show, Eq)
+type Start a  = Point a
+type Target a = Point a
 
--- data Path = Path { start :: Point
---                  , end   :: Point 
---                  , dist  :: Double
---                  , path  :: [Point]
---                  } deriving (Eq, Show)
+data Path a
+   = Path
+   { path :: [Line a]
+   , dist :: a
+   } 
+   | EmptyPath
+   deriving (Show, Eq)
 
--- data Line = Line { a :: Double
---                  , b :: Double
---                  , c :: Double } deriving (Eq, Show)
+instance Ord a => Ord (Path a) where
+    compare EmptyPath EmptyPath  = EQ
+    compare EmptyPath Path{..}   = LT
+    compare Path{..} EmptyPath   = GT
+    compare Path{dist = d1} Path{dist = d2} = d1 `compare` d2
 
--- type Polygon = [Point]
+join :: (Floating a) => Path a -> Path a -> Path a
+join p1 EmptyPath = p1
+join EmptyPath p2 = p2
+join p1 p2 = Path (path p1 ++ path p2) (dist p1 + dist p2)
 
--- instance Ord Path where
---     compare Path{dist = p1} Path{dist = p2} = p1 `compare` p2
+normalizePath :: Eq a => Path a -> Path a
+-- ^ If two consequtive points are the same, throw them out
+normalizePath Path{..} = Path path' dist
+  where
+    path' = filter (\(Line x y) -> if x == y then False else True) path
 
--- -- createPoly :: [Point] -> [Vector]
--- -- createPoly
+getP1 :: Line a -> Point a
+getP1 (Line p _) = p
 
--- createLine :: Point -> Point -> Line
--- createLine p1 p2 = Line a b (-c)
---   where a = (y p1) - (y p2)
---         b = (x p2) - (x p1)
---         c = (x p1) * (y p2) - (x p2) * (y p1)
-
--- intersect :: Vector -> Vector -> Bool
--- -- ^ True if 2 vectors intersect
--- -- https://stackoverflow.com/questions/20677795/how-do-i-compute-the-intersection-point-of-two-lines-in-python
--- intersect v1 v2 =
---     let d  = (a l1) * (b l2) - (b l1) * (a l2)
---         dx = (c l1) * (b l2) - (b l1) * (c l2)
---         dy = (a l1) * (c l2) - (c l1) * (a l2)
---     in d /= 0.0
---   where 
---     l1 = createLine (p1 v1) (p2 v1) :: Line
---     l2 = createLine (p1 v2) (p2 v2) :: Line
-
-
+getP2 :: Line a -> Point a 
+getP2 (Line _ p) = p
