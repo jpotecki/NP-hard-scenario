@@ -16,8 +16,6 @@ rawRobot = [(0,1),(2,0),(3,5),(6,2),(9,0)]
 toPolygon :: [(Double, Double)] -> Polygon Double
 toPolygon xs = Polygon $ tuple2Point <$> xs
 
-
-
 polygons :: [Polygon Double]
 polygons = toPolygon <$> rawPolygons'
 

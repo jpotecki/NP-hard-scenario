@@ -16,8 +16,6 @@ data Path a
    | EmptyPath
    deriving (Show, Eq)
 
-
-
 instance Ord a => Ord (Path a) where
     compare EmptyPath EmptyPath = EQ
     compare EmptyPath Path{..}   = LT
@@ -91,33 +89,22 @@ findMinDist ls = snd $ minimumBy minimumP ls
   where
 --     -- minimumP :: Ord a => (a, Line a) -> (a, Line a) -> Ordering
     minimumP t1 t2 = (fst t1) `compare` (fst t2)
---     -- distances :: [(a, Line a)]
-    -- distances      = map distance ls
---     -- distance :: Line a -> (a, Line a)
-    -- distance line  = (lineDistance line p, line)
 --------------------------------------------------------------------------------
 getPath :: (Show a, Ord a, Floating a) => Path a  -- Accumulator
                                -> Start a -> Target a -> [Line a] 
-                            --    -> IO (Path a)  -- Result
                                 -> Path a
 -- ^ takes two points and returns a paths
-getPath acc start target obst = do
+getPath acc start target obst =
     let line          = Line start target
         intersections = findAllIntersections line obst
-    -- putStrLn "printing intersections"
-    -- mapM print intersections
-    -- putStrLn "------------------------------------"
-    -- print acc 
-    -- putStrLn "------------------------------------"
-    case intersections of
+     in case intersections of
         [] -> join acc $ Path [line] (vectorDistance start target)
-        xs -> do
-            let nextLine = findMinDist xs
-                pR       = getP1 nextLine
-                pL       = getP2 nextLine
-                accL = Path [Line start pL] (vectorDistance start pL)
-                accR = Path [Line start pR] (vectorDistance start pR)
-                right= getPath accR pR target (obst \\ [nextLine])
-                left = getPath accL pL target (obst \\ [nextLine])
-             in join acc (min left right)
+        xs ->    let nextLine = findMinDist xs
+                     pR       = getP1 nextLine
+                     pL       = getP2 nextLine
+                     accL = Path [Line start pL] (vectorDistance start pL)
+                     accR = Path [Line start pR] (vectorDistance start pR)
+                     right= getPath accR pR target (obst \\ [nextLine])
+                     left = getPath accL pL target (obst \\ [nextLine])
+                  in join acc (min left right)
             -- return $ join acc left
