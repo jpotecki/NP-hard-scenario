@@ -16,6 +16,8 @@ data Path a
    | EmptyPath
    deriving (Show, Eq)
 
+
+
 instance Ord a => Ord (Path a) where
     compare EmptyPath EmptyPath = EQ
     compare EmptyPath Path{..}   = LT
@@ -96,7 +98,8 @@ findMinDist ls = snd $ minimumBy minimumP ls
 --------------------------------------------------------------------------------
 getPath :: (Show a, Ord a, Floating a) => Path a  -- Accumulator
                                -> Start a -> Target a -> [Line a] 
-                               -> IO (Path a)  -- Result
+                            --    -> IO (Path a)  -- Result
+                                -> Path a
 -- ^ takes two points and returns a paths
 getPath acc start target obst = do
     let line          = Line start target
@@ -107,14 +110,14 @@ getPath acc start target obst = do
     -- print acc 
     -- putStrLn "------------------------------------"
     case intersections of
-        [] -> return $ join acc $ Path [line] (vectorDistance start target)
+        [] -> join acc $ Path [line] (vectorDistance start target)
         xs -> do
             let nextLine = findMinDist xs
                 pR       = getP1 nextLine
                 pL       = getP2 nextLine
                 accL = Path [Line start pL] (vectorDistance start pL)
                 accR = Path [Line start pR] (vectorDistance start pR)
-            right <- getPath accR pR target (obst \\ [nextLine])
-            left  <- getPath accL pL target (obst \\ [nextLine])
-            return $ join acc $ min left right
+                right= getPath accR pR target (obst \\ [nextLine])
+                left = getPath accL pL target (obst \\ [nextLine])
+             in join acc (min left right)
             -- return $ join acc left

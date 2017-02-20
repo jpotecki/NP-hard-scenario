@@ -5,9 +5,9 @@ version:             0.1.0.0
 homepage:            https://github.com/githubuser/scenario5#readme
 license:             BSD3
 license-file:        LICENSE
-author:              Author name here
-maintainer:          example@example.com
-copyright:           2017 Author name here
+author:              Janos Potecki
+maintainer:          janospotecki et outlook dot com
+copyright:           2017 Janos Potecki
 category:            Web
 build-type:          Simple
 extra-source-files:  README.md
@@ -20,6 +20,8 @@ library
                      , Math1
   build-depends:       base >= 4.7 && < 5
                      , cubicbezier
+                     , parallel
+                     , deepseq
   default-language:    Haskell2010
 
 executable scenario5-exe

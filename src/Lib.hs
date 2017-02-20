@@ -5,6 +5,7 @@ module Lib
 import Math1
 import Geom2D
 import Data.List
+import Control.Parallel.Strategies
 
 robots :: [Point Double]
 robots =  fmap tuple2Point rawRobot
@@ -30,15 +31,6 @@ someFunc = do
     let robotPermutations = (,) <$> init robots <*> tail robots
         polygons'         = getAllObstacleLines polygons
         getPath' = \(r1,r2) -> getPath EmptyPath r1 r2 polygons'
-    print $ nub robotPermutations
-    mapM getPath' robotPermutations >>= mapM_ (print . normalizePath)
-    -- let start  = robots !! 0
-    --     target = robots !! 1
-    -- putStrLn "Printing polygons"
-    -- -- print $ (toPolygon) <$> rawPolygons'
-    -- print  $ getAllObstacleLines polygons
-    -- putStrLn "done printing"
-    -- path   <- getPath EmptyPath start target (getAllObstacleLines polygons)
-    -- putStrLn "Result:"
-    -- print $ normalizePath path
-
+        mapping  = map getPath' robotPermutations -- lazy piece of shit
+        computed = mapping `using` parList rseq
+     in mapM_ (print . normalizePath) computed
