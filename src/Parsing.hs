@@ -2,8 +2,8 @@ module Parsing (
     parseLine
 ) where
 
-import Text.Parsec
-import Text.Parsec.String
+import Text.Parsec hiding (Line)
+import Text.Parsec.String hiding (Line)
 
 number :: Parser String 
 number = many1 digit
@@ -49,8 +49,7 @@ line_parsing = do
     many digit
     string ": "
     first <- list 
-    char '#'
-    second <- many (list <* optional (sep_with_space ';'))
+    second <- option [] (char '#' *> many (list <* optional (sep_with_space ';')))
     return (first, second)
 
 parseLine :: String 

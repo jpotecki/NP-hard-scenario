@@ -39,11 +39,11 @@ isInScope :: (Ord a, Floating a) => Line a -> Line a
                                  -> Point a -- Target point 
                                  -> Point a -- Intersection Point
                                  -> Bool
-isInScope l1 l2 t p = 
-    isInScope' p l2 && isInScope' p l1 && not (isInScope' t l2)
+isInScope moveLine@(Line p1 p2) obSide target collisionPoint = 
+    pointInLine collisionPoint obSide && pointInLine collisionPoint moveLine && (collisionPoint /= p1)
 
-isInScope' :: (Ord a, Floating a) => Point a -> Line a -> Bool
-isInScope' p (Line p1 p2) = 
+pointInLine :: (Ord a, Floating a) => Point a -> Line a -> Bool
+pointInLine p (Line p1 p2) = 
         linedist == (vectorDistance p p1) + (vectorDistance p p2) 
   where linedist = vectorDistance p1 p2
 
@@ -56,7 +56,7 @@ findMinDist ls = snd $ minimumBy minimumP ls
 --------------------------------------------------------------------------------
 getPath :: (Show a, Ord a, Floating a) => Path a  -- Accumulator
                                -> Start a -> Target a -> [Line a] 
-                                -> Path a
+                               -> Path a
 -- ^ takes two points and returns a paths
 getPath acc start target obst =
     let line          = Line start target
@@ -66,8 +66,8 @@ getPath acc start target obst =
         xs ->    let nextLine = findMinDist xs
                      pR       = getP1 nextLine
                      pL       = getP2 nextLine
-                     accL = Path [Line start pL] (vectorDistance start pL)
-                     accR = Path [Line start pR] (vectorDistance start pR)
-                     right= getPath accR pR target (obst \\ [nextLine])
-                     left = getPath accL pL target (obst \\ [nextLine])
+                     accL  = Path [Line start pL] (vectorDistance start pL)
+                     accR  = Path [Line start pR] (vectorDistance start pR)
+                     right = getPath accR pR target (obst \\ [nextLine])
+                     left  = getPath accL pL target (obst \\ [nextLine])
                   in join acc (min left right)
