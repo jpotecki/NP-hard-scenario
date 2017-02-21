@@ -44,14 +44,14 @@ polygonSegs (Polygon xs) = zipWith ((,)) xs xs'
 
 intersectWithPoly :: Constraint a 
                   => Seg a -> Polygon a 
-                  -> Maybe (a, Polygon a)
--- ^ returns Polygon and the distance if Segment intersects with it
+                  -> Maybe a
+-- ^ returns the distance if Segment intersects with it
 intersectWithPoly seg@(origin, _) poly = case intersect of
     [] -> Nothing
-    xs -> Just (minimum xs, poly)
+    xs -> Just $  xs
   where 
     minimumP p1 p2 = (fst p1) `compare` (fst p2)
-    intersect = mapMaybe (intersectSegSeg' seg) (polygonSegs poly)
+    intersect = minimum $ mapMaybe (intersectSegSeg' seg) (polygonSegs poly)
     -- intersectSegSeg' ::Constraint a=> Seg a -> Seg a -> Maybe a
     intersectSegSeg' (a,b) (c,d) = 
         intersectSegSeg a b c d >>= \p -> Just $ vectorDistance origin p
