@@ -22,6 +22,7 @@ library
                      , cubicbezier
                      , parallel
                      , deepseq
+                     , parsec
   default-language:    Haskell2010
 
 executable scenario5-exe
