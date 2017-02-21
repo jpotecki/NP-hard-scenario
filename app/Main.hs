@@ -3,4 +3,7 @@ module Main where
 import Lib
 
 main :: IO ()
-main = someFunc
+main = do
+    file <- readFile "robots.mat" >>= return.lines
+    mapM_ calcPaths file
+    

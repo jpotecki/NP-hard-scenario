@@ -1,5 +1,5 @@
 module Parsing (
-    line_parsing
+    parseLine
 ) where
 
 import Text.Parsec
@@ -45,7 +45,7 @@ sep_with_space :: Char -> Parser Char
 sep_with_space c = spaces >>  char c <* spaces
 
 line_parsing :: Parser ([(Double, Double)], [[(Double, Double)]])
-line_parsing = do 
+line_parsing = do
     many digit
     string ": "
     first <- list 
@@ -53,4 +53,6 @@ line_parsing = do
     second <- many (list <* optional (sep_with_space ';'))
     return (first, second)
 
-    
+parseLine :: String 
+            -> Either ParseError ([(Double, Double)], [[(Double, Double)]])
+parseLine str = parse line_parsing "" str

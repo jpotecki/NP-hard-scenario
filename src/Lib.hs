@@ -1,5 +1,5 @@
 module Lib
-    ( someFunc
+    ( calcPaths
     ) where
 
 import Math1
@@ -8,6 +8,9 @@ import Data.List
 import Control.Parallel.Strategies
 import Types
 import Parsing
+import Data.Either
+import Text.Parsec
+import Text.Parsec.String
 
 robots :: [DPoint]
 robots =  fmap tuple2Point rawRobot
@@ -26,10 +29,20 @@ rawPolygons' =  [ [(1,2),(1,4),(3,4),(3,2)]
                 , [(8,1),(4,1),(4,4),(5,2)]
                 ]
 
-someFunc :: IO ()
-someFunc = let robotPermutations = (,) <$> init robots <*> tail robots
-               polygons'         = getAllObstacleLines polygons
-               getPath' = \(r1,r2) -> getPath EmptyPath r1 r2 polygons'
-               mapping  = map getPath' robotPermutations -- lazy piece of shit
-               computed = mapping `using` parList rseq
-            in mapM_ (print . normalizePath) computed
+type Robots = [(Double, Double)]
+type Obstacles = [[(Double, Double)]]
+
+calcPaths :: String -> IO ()
+calcPaths xs = case parseLine xs of 
+                    Left  e     -> print e
+                    Right (r,o) -> calcPath r o
+
+calcPath :: Robots -> Obstacles -> IO ()
+calcPath rob obs = do
+    let robots' = map (tuple2Point) rob
+        robotPermutations = (,) <$> init robots' <*> tail robots'
+        polygons'= getAllObstacleLines $ toPolygon <$> rawPolygons'
+        getPath' = \(r1,r2) -> getPath EmptyPath r1 r2 polygons'
+        mapping  = map getPath' robotPermutations --lazy piece of s..
+        computed = mapping `using` parList rseq
+     in mapM_ (print . normalizePath) computed
