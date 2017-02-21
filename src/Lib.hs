@@ -26,9 +26,9 @@ rawPolygons' =  [ [(1,2),(1,4),(3,4),(3,2)]
                 ]
 
 someFunc :: IO ()
-someFunc = let  robotPermutations = (,) <$> init robots <*> tail robots
-                polygons'         = getAllObstacleLines polygons
-                getPath' = \(r1,r2) -> getPath EmptyPath r1 r2 polygons'
-                mapping  = map getPath' robotPermutations -- lazy piece of shit
-                computed = mapping `using` parList rseq
-             in mapM_ (print . normalizePath) computed
+someFunc = let robotPermutations = (,) <$> init robots <*> tail robots
+               polygons'         = getAllObstacleLines polygons
+               getPath' = \(r1,r2) -> getPath EmptyPath r1 r2 polygons'
+               mapping  = map getPath' robotPermutations -- lazy piece of shit
+               computed = mapping `using` parList rseq
+            in mapM_ (print . normalizePath) computed
