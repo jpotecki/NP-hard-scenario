@@ -17,8 +17,8 @@ data Path a
 
 instance Ord a => Ord (Path a) where
     compare EmptyPath EmptyPath  = EQ
-    compare EmptyPath Path{..}   = LT
-    compare Path{..} EmptyPath   = GT
+    compare EmptyPath Path{..}   = GT
+    compare Path{..} EmptyPath   = LT
     compare Path{dist = d1} Path{dist = d2} = d1 `compare` d2
 
 join :: (Floating a) => Path a -> Path a -> Path a

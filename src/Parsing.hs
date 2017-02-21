@@ -49,8 +49,7 @@ line_parsing = do
     many digit
     string ": "
     first <- list 
-    char '#'
-    second <- many (list <* optional (sep_with_space ';'))
+    second <- option [] (char '#' *> many (list <* optional (sep_with_space ';')))
     return (first, second)
 
 parseLine :: String 

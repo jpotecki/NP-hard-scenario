@@ -19,6 +19,8 @@ library
                      , Types
                      , Math1
                      , Parsing
+                     , Math2
+                     , Vector
   build-depends:       base >= 4.7 && < 5
                      , cubicbezier
                      , parallel

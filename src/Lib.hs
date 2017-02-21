@@ -35,14 +35,26 @@ type Obstacles = [[(Double, Double)]]
 calcPaths :: String -> IO ()
 calcPaths xs = case parseLine xs of 
                     Left  e     -> print e
-                    Right (r,o) -> calcPath r o
+                    Right (r,o) -> do
+                        putStrLn "robots"
+                        print r
+                        putStrLn "obst"
+                        print o
+                        putStrLn "lines"
+                        print $ getAllObstacleLines $ toPolygon <$> o
+                        putStrLn "path"
+                        
+                        calcPath r o
 
 calcPath :: Robots -> Obstacles -> IO ()
 calcPath rob obs = do
     let robots' = map (tuple2Point) rob
         robotPermutations = (,) <$> init robots' <*> tail robots'
-        polygons'= getAllObstacleLines $ toPolygon <$> rawPolygons'
+        polygons'= getAllObstacleLines $ toPolygon <$> obs
         getPath' = \(r1,r2) -> getPath EmptyPath r1 r2 polygons'
-        mapping  = map getPath' robotPermutations --lazy piece of s..
-        computed = mapping `using` parList rseq
-     in mapM_ (print . normalizePath) computed
+    putStrLn "polygon lines"
+    print polygons'
+    mapping  <- mapM getPath' robotPermutations --lazy piece of s..
+        -- computed = mapping `using` parList rseq
+    mapM_ (print . normalizePath) mapping
+    -- mapM_ print mapping
