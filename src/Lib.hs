@@ -7,6 +7,7 @@ import Geom2D
 import Data.List
 import Control.Parallel.Strategies
 import Types
+import Parsing
 
 robots :: [DPoint]
 robots =  fmap tuple2Point rawRobot
