@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards, ConstraintKinds #-}
 
-module Math1 (intersectSegSeg, intersect, round') where
+module Math1 (intersectSegSeg, intersect, round', isInScope') where
 
 import Geom2D
 import Data.Maybe
@@ -8,13 +8,6 @@ import Data.List (minimumBy, (\\))
 import Types
 
 type Constraint a = (Ord a, Floating a, Show a, RealFrac a)
-
-
--- findAllIntersections :: (Ord a, Floating a) => Line a -> [Line a] 
---                                             -> [(a,Line a)]
--- -- ^ returns takes a line `x` and [list] `xs` and returns `xs'` intersecting x
--- findAllIntersections l1@(Line start _) ls = 
---     catMaybes $ map (\x -> intersect l1 x) ls
 
 intersectSegSeg ::  Constraint a => Point a -> Point a -> Point a -> Point a
                  -> Maybe a
@@ -39,12 +32,20 @@ isInScope l1 l2 p =
     isInScope' p l1 && isInScope' p l2 -- && not (isInScope' t l2)
 
 isInScope' ::  Constraint a => Point a -> Line a -> Bool
-isInScope' p (Line p1 p2) = 
-        linedist == (round' $ (vectorDistance p p1) + (vectorDistance p p2))
-  where linedist = round' $ vectorDistance p1 p2
+isInScope' p (Line p1 p2)
+    | p == p1   = True
+    | p == p2   = True
+    | otherwise = abs( (p1dist + p2dist) - (linedist ) ) < epsilon
+    -- P1 ------------- p ------------P2
+  where linedist = vectorDistance p1 p2
+        p1dist   = vectorDistance p p1
+        p2dist   = vectorDistance p p2
 
 round' :: Constraint a => a -> a
-round' = \f -> (fromInteger $ round $ f * (10^9)) / (10.0^^9)
+round' = \f -> (fromInteger $ round $ f * (10**14)) / (10.0**14)
+
+epsilon :: Constraint a => a
+epsilon = 0.000000001
 
 -- findMinDist :: (Ord a, Floating a) => [(a, Line a)] -> Line a
 -- -- ^ finds the closest line to the point !!! [Line a] cannot be empty list
