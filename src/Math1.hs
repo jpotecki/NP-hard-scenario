@@ -46,36 +46,3 @@ round' = \f -> (fromInteger $ round $ f * (10**14)) / (10.0**14)
 
 epsilon :: Constraint a => a
 epsilon = 0.000000001
-
--- findMinDist :: (Ord a, Floating a) => [(a, Line a)] -> Line a
--- -- ^ finds the closest line to the point !!! [Line a] cannot be empty list
--- findMinDist ls = snd $ minimumBy minimumP ls
---   where minimumP t1 t2 = (fst t1) `compare` (fst t2)
--- --     -- minimumP :: Ord a => (a, Line a) -> (a, Line a) -> Ordering
-    
--- --------------------------------------------------------------------------------
--- getPath :: (Show a, Ord a, Floating a)
---                 => Path a  -- Accumulator
---                 -> Start a -> Target a
---                 -> [Line a] --Obstacles
---                 -> IO (Path a)
--- -- ^ takes two points and returns a paths
--- getPath acc start target obst = do
---     let line          = Line start target
---         intersections = findAllIntersections line obst
---     putStrLn "Intersections"
---     -- mapM_ print intersections
---     case intersections of
---         [] -> return $ join acc $ Path [line] (vectorDistance start target)
---         xs -> do let nextLine = findMinDist xs
---                      pR       = getP1 nextLine
---                      pL       = getP2 nextLine
---                  putStrLn $ "going to " ++ show nextLine
---                  let accL = Path [Line start pL] (vectorDistance start pL)
---                  let accR = Path [Line start pR] (vectorDistance start pR)
---                  right<- getPath' accR pR nextLine
---                  left <- getPath' accL pL nextLine
---                  return $ join acc (min left right)
---                 --  return $ join acc right
---   where getPath' acc p nl | p == start = return EmptyPath
---                           | otherwise  = getPath acc p target (obst \\ [nl])

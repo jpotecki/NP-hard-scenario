@@ -76,16 +76,16 @@ nextPaths awaken asleep obstacles acc =
     (nextPaths (awaken' ++ justAwaken) stillAsleep obstacles (newAcc ++ emptyPaths))
     where 
         combinations = zip awaken asleep
-        newPaths = map (getPath' obstacles) combinations -- [p1, p2]
+        newPaths = map (getPath' obstacles) combinations
+        computedPaths = newPaths `using` parList rseq
         justAwaken = map snd combinations
         stillAsleep = filter (\ x -> not (x `elem` justAwaken)) asleep
-        newAcc = zipWith join acc (newPaths ++ (repeat EmptyPath))
+        newAcc = zipWith join acc (computedPaths ++ (repeat EmptyPath))
         emptyPaths = replicate (length justAwaken) EmptyPath
         awaken' = justAwaken ++ (drop (length justAwaken) awaken) 
 
 calculateSolution :: Robots -> Obstacles -> IO ()
 calculateSolution robs obs = do
-    -- mapM_ print robs
     let robots'   = map (tuple2Point) robs
         polygons' = toPolygon <$> obs
         solution = nextPaths ([head robots']) (tail robots') polygons' [EmptyPath]

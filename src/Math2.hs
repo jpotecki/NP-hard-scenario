@@ -3,14 +3,14 @@
 module Math2 (
           intersectWithPoly, intersectSegSeg
         , eitherClosestPointPolygon, eitherCollision, getClosestPoly
-        , closestPoint', getNumberOfIntersections, polygonSegs, initGetPath
+        , closestPoint', getNumberOfIntersections, polygonSegs, initGetPath, purePath
         ) where
 
 import Geom2D
 import Data.Maybe
 import Data.List (minimumBy, (\\), elemIndex, find)
 import Types
--- import Vector (intersectSegSeg)
+import Debug.Trace
 import Math1 (intersectSegSeg)
 
 type Seg a = (Point a, Point a)
@@ -20,6 +20,9 @@ type Obstacles a = [Polygon a]
 type PathAcc a = Path a
 type Sitting a = Maybe (Polygon a)
 type Constraint a = (Ord a, Floating a, Show a, RealFrac a)
+type Memory a = Maybe [Point a]
+
+purePath = getPath
 
 initGetPath :: Constraint a
         => Origin a 
@@ -28,7 +31,7 @@ initGetPath :: Constraint a
         -> Path a
 initGetPath origin target obstacles =
     let sitting = find (isMyPolygon origin) obstacles
-     in getPath origin sitting target obstacles EmptyPath
+     in getPath origin sitting target obstacles EmptyPath Nothing
 
 getPath :: Constraint a
         => Origin a 
@@ -37,14 +40,21 @@ getPath :: Constraint a
         -> Obstacles a 
         -> PathAcc a
         -> Path a
-getPath origin sitting target obstacles !acc = 
+getPath origin sitting target obstacles !acc !memory =
   case eitherClosestPointPolygon (origin, target) obstacles sitting of
+    {- eitherClosestPointPolygon
+     Left True   := rotate in the sitting polygon
+    Left False  := direct Way exists
+    Right point := closest point of the closest polygon which intersects seg -}
     Left False ->
+        trace ("direct path " ++ show target)
         join acc $ Path [Line origin target] (vectorDistance origin target)
     Left True  ->
+        -- trace ("rotate!")
         rotateRight origin sitting target obstacles acc
-    Right (point, polygon) ->
-        let p     = getPath origin sitting point (obstacles \\ [polygon]) acc
+    Right (point, polygon) -> do
+        let p     = trace ("go first to " ++ show point ++ "then to " ++ show target) getPath origin sitting point (obstacles \\ [polygon]) acc
+        -- let p      = getPath origin sitting point (obstacles \\ [polygon]) acc
          in getPath point (Just polygon) target obstacles p
         
 rotateRight :: Constraint a
@@ -55,7 +65,7 @@ rotateRight :: Constraint a
         -> PathAcc a
         -> Path a
 rotateRight origin Nothing target obstacles acc = EmptyPath
-rotateRight origin sit@(Just (Polygon points)) target obstacles acc =
+rotateRight origin sit@(Just (Polygon points)) target obstacles !acc =
     let maybeIndex = elemIndex origin points
      in case maybeIndex of
         Nothing    -> EmptyPath
@@ -104,6 +114,9 @@ closestPoint' p (Polygon ps) = snd $ minimumBy minimumP ps'
 isMyPolygon :: Constraint a => Point a -> Polygon a -> Bool
 -- ^ True, if point is a vertex of the polygon
 isMyPolygon p (Polygon ps) = p `elem` ps 
+
+notMyPresident :: Constraint a => Point a -> Polygon a -> Bool
+notMyPresident p ps = not $ isMyPolygon p ps
 
 type Rotate = Bool
 
