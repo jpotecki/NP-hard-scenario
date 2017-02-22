@@ -21,6 +21,18 @@ instance Ord a => Ord (Path a) where
     compare Path{..} EmptyPath   = LT
     compare Path{dist = d1} Path{dist = d2} = d1 `compare` d2
 
+tuple2Point :: (Ord a, Floating a) => (a, a) -> Point a
+tuple2Point (x, y) = Point x y
+
+transformPolygon :: Polygon a -> [Line a]
+-- ^ transfors a poligon to a list of lines
+transformPolygon (Polygon xs) = zipWith (Line) xs xs'
+  where xs' = (last xs) : init xs
+
+getAllObstacleLines :: [Polygon a] -> [Line a]
+-- ^ Transforms polygons to a list of lines
+getAllObstacleLines ps = concat $ transformPolygon <$> ps
+
 join :: (Floating a) => Path a -> Path a -> Path a
 join p1 EmptyPath = p1
 join EmptyPath p2 = p2

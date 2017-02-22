@@ -5,5 +5,5 @@ import Lib
 main :: IO ()
 main = do
     file <- readFile "robots.mat" >>= return.lines
-    calcPaths $ file !! 2
+    calcPaths $ file !! 1
     

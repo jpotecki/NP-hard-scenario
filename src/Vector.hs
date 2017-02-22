@@ -1,6 +1,6 @@
 
 module Vector 
-    (intersectSegSeg) where
+    () where
 
 import Types
 import Geom2D

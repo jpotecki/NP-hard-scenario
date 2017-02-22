@@ -2,7 +2,7 @@ module Lib
     ( calcPaths
     ) where
 
-import Math1
+import Math2
 import Geom2D
 import Data.List
 import Control.Parallel.Strategies
@@ -46,15 +46,17 @@ calcPaths xs = case parseLine xs of
                         
                         calcPath r o
 
+getPath = initGetPath
+
 calcPath :: Robots -> Obstacles -> IO ()
 calcPath rob obs = do
     let robots' = map (tuple2Point) rob
         robotPermutations = (,) <$> init robots' <*> tail robots'
-        polygons'= getAllObstacleLines $ toPolygon <$> obs
-        getPath' = \(r1,r2) -> getPath EmptyPath r1 r2 polygons'
+        polygons'= toPolygon <$> obs
+        getPath' = \(origin, target) -> getPath origin target polygons'
     putStrLn "polygon lines"
     print polygons'
-    mapping  <- mapM getPath' robotPermutations --lazy piece of s..
+    let mapping  = map getPath' robotPermutations --lazy piece of s..
         -- computed = mapping `using` parList rseq
-    mapM_ (print . normalizePath) mapping
+    mapM_ (print) mapping
     -- mapM_ print mapping
