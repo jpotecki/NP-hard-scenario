@@ -39,6 +39,7 @@ getPath :: Constraint a
         -> Target a 
         -> Obstacles a 
         -> PathAcc a
+        -> Memory a
         -> Path a
 getPath origin sitting target obstacles !acc !memory =
   case eitherClosestPointPolygon (origin, target) obstacles sitting of
@@ -47,32 +48,44 @@ getPath origin sitting target obstacles !acc !memory =
     Left False  := direct Way exists
     Right point := closest point of the closest polygon which intersects seg -}
     Left False ->
-        trace ("direct path " ++ show target)
+        -- trace ("direct path " ++ show target)
         join acc $ Path [Line origin target] (vectorDistance origin target)
     Left True  ->
         -- trace ("rotate!")
-        rotateRight origin sitting target obstacles acc
+        rotateRight origin sitting target obstacles acc memory
     Right (point, polygon) -> do
-        let p     = trace ("go first to " ++ show point ++ "then to " ++ show target) getPath origin sitting point (obstacles \\ [polygon]) acc
-        -- let p      = getPath origin sitting point (obstacles \\ [polygon]) acc
-         in getPath point (Just polygon) target obstacles p
-        
+    -- idea: get here all polygons and search for the closest reachable point 
+    -- directly reachable point
+
+        -- let p     = trace ("go first to " ++ show point ++ "then to " ++ show target) getPath origin sitting point (obstacles \\ [polygon]) acc memory
+        let p      = getPath origin sitting point (obstacles \\ [polygon]) acc  $ origin `putInto` memory
+         in getPath point (Just polygon) target obstacles p memory
+
 rotateRight :: Constraint a
         => Origin a 
         -> Sitting a -- Just Polygon the polygon we are currently sitting on
         -> Target a 
         -> Obstacles a 
         -> PathAcc a
+        -> Memory a
         -> Path a
-rotateRight origin Nothing target obstacles acc = EmptyPath
-rotateRight origin sit@(Just (Polygon points)) target obstacles !acc =
+rotateRight origin Nothing target obstacles acc _ = EmptyPath
+rotateRight origin sit@(Just (Polygon points)) target obstacles !acc !memory =
     let maybeIndex = elemIndex origin points
      in case maybeIndex of
         Nothing    -> EmptyPath
         Just index -> do
             let p    = (cycle points) !! (index + 1) -- get the next point
                 acc' = join acc $ Path [Line origin p] (vectorDistance origin p)
-             in getPath p sit target obstacles acc'
+             in getPath p sit target obstacles acc' memory
+
+isIn :: Constraint a => Point a -> Memory a -> Bool
+point `isIn` Nothing = False
+point `isIn` (Just xs) = point `elem` xs
+
+putInto ::  Constraint a => Point a -> Memory a -> Memory a
+p `putInto` Nothing = Just [p]
+p `putInto` Just ps = Just (p:ps)
 
 getPS :: Polygon a -> [Point a]
 getPS (Polygon xs) = xs
