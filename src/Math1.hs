@@ -10,18 +10,22 @@ import Types
 type Constraint a = (Ord a, Floating a, Show a, RealFrac a)
 
 intersectSegSeg ::  Constraint a => Point a -> Point a -> Point a -> Point a
-                 -> Maybe a
+                --  -> Maybe a 
+                -> Maybe (a, Point a)
 intersectSegSeg a b c d =
-    intersect (Line a b) (Line c d) >>= Just . fst
+    -- intersect (Line a b) (Line c d) >>= Just . fst
+    intersect (Line a b) (Line c d)
 
 intersect ::  Constraint a => Line a -> Line a 
-                                 -> Maybe (a, Line a) 
+                                --  -> Maybe (a, Line a) 
+                                -> Maybe (a, Point a)
 intersect l1@(Line start target) l2 = do
     let intersecPoint = lineIntersect l1 l2 0
     case intersecPoint of 
       Nothing -> Nothing
       Just x  -> if isInScope l1 l2 x
-                 then Just (vectorDistance x start, l2)
+                --  then Just (vectorDistance x start, l2)
+                 then Just (vectorDistance x start, x)
                  else Nothing
     --   Just x -> Just (vectorDistance x start, l2)
 
